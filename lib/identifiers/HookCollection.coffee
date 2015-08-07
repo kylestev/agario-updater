@@ -72,10 +72,10 @@ class HookCollection
       console.log '∫', clazz.name, '→', identified
 
       # extract all `FieldHook` types from hooks
-      for ignored, hook of clazz.fields
+      for ignored, hook of _.sortBy clazz.fields, 'name'
         console.log '  ✔', hook.name, '→', hook.field.name
 
-    for ig, func of _.filter @hooks, { type: 'FunctionHook' }
+    for ig, func of _.sortBy _.filter(@hooks, { type: 'FunctionHook' }), 'name'
       identified = if func.func == null then 'BROKEN' else func.func.id.name + expand_unknown_params(func.params)
       console.log '•', func.name + expand_known_params(func.params), '→', identified
 

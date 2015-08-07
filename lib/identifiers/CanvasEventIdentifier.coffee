@@ -72,7 +72,6 @@ class CanvasEventIdentifier extends Identifier
         type: 'ExpressionStatement', expression: { type: 'CallExpression' }
       })(expr)
         func = Helper.findFunction @root, expr.expression.callee.name
-        # console.log expr, func
         hook = @identifyFunction funcHookNames[funcCount++], func
         Helper.injectFunctionHookComment expr, hook
 
