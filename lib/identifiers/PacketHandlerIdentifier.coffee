@@ -42,14 +42,38 @@ class PacketHandlerIdentifier extends Identifier
                   return false
                 Helper.injectTailCallback _case.consequent, callbackPath, params
 
+              injectPacketComment = (_case, title, link) ->
+                Helper.injectCommentBlock _case.consequent[0], ' ' + title + ' | ' + link + ' '
+
               for idx, _case of func.body.body[3].cases
                 switch _case.test.value
+                  when 16
+                    injectPacketComment _case, 'World Update', 'http://agar.gcommer.com/index.php?title=Protocol#World_Update_.28opcode_16.29'
+                    injectPacketCallback('Callback.Packets.onWorldUpdate', [], _case)
                   when 17
+                    injectPacketComment _case, 'View Update', 'http://agar.gcommer.com/index.php?title=Protocol#View_Update_.28opcode_17.29'
                     injectPacketCallback('Callback.Packets.onViewUpdate', ['viewX', 'viewY', 'viewZoom'], _case)
+                  when 20
+                    injectPacketComment _case, 'Reset', 'http://agar.gcommer.com/index.php?title=Protocol#Reset_.28opcode_20.29'
+                    injectPacketCallback('Callback.Packets.onReset', [], _case)
                   when 21
+                    injectPacketComment _case, 'Draw Debug Line', 'http://agar.gcommer.com/index.php?title=Protocol#Draw_debug_line_.28opcode_21.29'
                     injectPacketCallback('Callback.Packets.onDebugLine', ['debugLineX', 'debugLineY'], _case)
+                  when 32
+                    injectPacketComment _case, 'Owns Blob', 'http://agar.gcommer.com/index.php?title=Protocol#Owns_blob_.28opcode_32.29'
+                    injectPacketCallback('Callback.Packets.onOwnsBlob', [], _case)
+                  when 49
+                    injectPacketComment _case, 'FFA Leaderboard', 'http://agar.gcommer.com/index.php?title=Protocol#FFA_Leaderboard_.28opcode_49.29'
+                    injectPacketCallback('Callback.Packets.onFFALeaderboard', [], _case)
+                  when 50
+                    injectPacketComment _case, 'Team Leaderboard', 'http://agar.gcommer.com/index.php?title=Protocol#Team_Leaderboard_.28opcode_50.29'
+                    injectPacketCallback('Callback.Packets.onTeamLeaderboard', [], _case)
                   when 64
+                    injectPacketComment _case, 'Game Area Size', 'http://agar.gcommer.com/index.php?title=Protocol#Game_area_size_.28opcode_64.29'
                     injectPacketCallback('Callback.Packets.onGameAreaSize', ['gameMinX', 'gameMinY', 'gameMaxX', 'gameMaxY'], _case)
+                  when 81
+                    injectPacketComment _case, 'Blob Experience Info', 'http://agar.gcommer.com/index.php?title=Protocol#Blob_experience_info_.28opcode_81.29'
+                    injectPacketCallback('Callback.Packets.onBlobExperienceInfo', [], _case)
 
               this.break()
         }
