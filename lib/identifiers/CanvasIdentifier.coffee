@@ -17,9 +17,10 @@ class CanvasIdentifier extends Identifier
     cachedCanvasName = null
     estraverse.traverse @tree, {
       enter: (node, parent) ->
-        if (_.matches { type: 'NewExpression', arguments: [{ value: '#FFFFFF' }, { value: '#000000' }] })(node)
-          cachedCanvasName = node.callee.name
-          this.break()
+        if node.type == 'NewExpression' and node.arguments.length == 4
+          if (_.matches { arguments: [{ value: '#FFFFFF' }, { value: '#000000' }] })(node)
+            cachedCanvasName = node.callee.name
+            this.break()
     }
     cachedCanvas = _.find _.filter(@root, (node) -> Helper.matchType 'FunctionDeclaration'), { id: name: cachedCanvasName }
     @identifyCachedCanvas cachedCanvas
