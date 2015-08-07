@@ -271,7 +271,6 @@ class SendCommandIdentifier extends Identifier
         hook = @identifyFunction 'PlayerStatistics', realFunc
         Helper.injectFunctionHookComment node, hook
       else
-        console.log @hooks.hooks
         if _.size(_.filter(@hooks.hooks, { name: 'PlayerStatistics' })) != 1
           @identifyFunction 'PlayerStatistics', null
 
