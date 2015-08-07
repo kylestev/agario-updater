@@ -241,20 +241,19 @@ class SendCommandIdentifier extends Identifier
 
       methodGuts = node.expression.right.body.body
 
-      if _.matches({
-        type: 'ExpressionStatement', expression: { type: 'AssignmentExpression', operator: '=' }
-      })(methodGuts[0])
-        hook = @identifyField 'Init', 'canvasMouseX', methodGuts[0].expression.left
-        Helper.injectFieldHookComment methodGuts[0].expression.left, hook
+      count = 0
+      hookNames = ['canvasMouseX', 'canvasMouseY']
+      for idx, expr of methodGuts
+        if count >= hookNames.length
+          break
 
-      if _.matches({
-        type: 'ExpressionStatement', expression: { type: 'AssignmentExpression', operator: '=' }
-      })(methodGuts[1])
-        hook = @identifyField 'Init', 'canvasMouseY', methodGuts[1].expression.left
-        Helper.injectFieldHookComment methodGuts[1].expression.left, hook
+        if _.matches({
+          type: 'ExpressionStatement', expression: { type: 'AssignmentExpression', operator: '=' }
+        })(expr)
+          hook = @identifyField 'Init', hookNames[count++], expr.expression.left
+          Helper.injectFieldHookComment expr.expression.left, hook
 
-      @identifyFunction 'UpdatePos', Helper.findFunction tree, methodGuts[2].expression.callee.name
-      Helper.injectCallback node.expression.right, 'Callback.onMouseMove'
+      @identifyFunction 'UpdatePos', Helper.findFunction tree, methodGuts[methodGuts.length - 1].expression.callee.name
 
   identifyPlayerStatistics: (tree, initFunc) ->
     _.each initFunc.body.body, (node) =>
