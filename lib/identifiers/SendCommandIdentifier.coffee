@@ -253,9 +253,6 @@ class SendCommandIdentifier extends Identifier
           hook = @identifyField 'Init', hookNames[count++], expr.expression.left
           Helper.injectFieldHookComment expr.expression.left, hook
 
-      hook = @identifyFunction 'UpdatePos', Helper.findFunction tree, methodGuts[methodGuts.length - 1].expression.callee.name
-      Helper.injectFunctionHookComment methodGuts[methodGuts.length - 1], hook
-
   identifyPlayerStatistics: (tree, initFunc) ->
     _.each initFunc.body.body, (node) =>
       if not Helper.matchCaller node, 'setInterval'

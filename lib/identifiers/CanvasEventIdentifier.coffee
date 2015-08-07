@@ -20,6 +20,8 @@ class CanvasEventIdentifier extends Identifier
     @emitter.on 'gameCanvas.event', (eventName, ast) =>
       if eventName == 'onmousewheel'
         @identifyWheelHandler ast
+      if eventName == 'onmousedown'
+        @identifyMouseDown ast
 
   identifyCanvasEvents: (cls, canvasHook) ->
     estraverse.traverse @tree, {
@@ -53,6 +55,26 @@ class CanvasEventIdentifier extends Identifier
         return true
     else
       @identifyFunction 'WheelHandler', null
+
+  identifyMouseDown: (ast) ->
+    fieldCount = 0
+    fieldHookNames = ['canvasMouseX', 'canvasMouseY']
+    funcCount = 0
+    funcHookNames = ['UpdatePosition', 'SendPosition']
+    for idx, expr of ast.body.body
+      if fieldCount < fieldHookNames.length and _.matches({
+        type: 'ExpressionStatement', expression: { type: 'AssignmentExpression', operator: '=' }
+      })(expr)
+        hook = @identifyField 'Init', fieldHookNames[fieldCount++], expr.expression.left
+        Helper.injectFieldHookComment expr.expression.left, hook
+
+      if funcCount < funcHookNames.length and _.matches({
+        type: 'ExpressionStatement', expression: { type: 'CallExpression' }
+      })(expr)
+        func = Helper.findFunction @root, expr.expression.callee.name
+        console.log expr, func
+        hook = @identifyFunction funcHookNames[funcCount++], func
+        Helper.injectFunctionHookComment expr, hook
 
   visit: (root, tree) ->
     @root = root
