@@ -66,17 +66,22 @@ class HookCollection
   modScript: () ->
     classes = _.sortBy _.filter(@hooks, { type: 'ClassHook' }), 'name'
 
+    console.log 'Identified Classes'
     _.each classes, (clazz) ->
       identified = if clazz['class'] == null then 'BROKEN' else clazz['class']
-      console.log '∫', clazz.name, '→', identified
+      console.log ' ∫', clazz.name, '→', identified
 
       # extract all `FieldHook` types from hooks
       for ignored, hook of _.sortBy clazz.fields, 'name'
-        console.log '  ✔', hook.name, '→', hook.field.name
+        console.log '   ✔', hook.name, '→', hook.field.name
+      console.log ''
 
+    console.log (new Array 72).join '-'
+    console.log 'Identified Functions'
     for ig, func of _.sortBy _.filter(@hooks, { type: 'FunctionHook' }), 'name'
       identified = if func.func == null then 'BROKEN' else func.func.id.name + expand_unknown_params(func.params)
-      console.log '•', func.name + expand_known_params(func.params), '→', identified
+      console.log ' •', func.name + expand_known_params(func.params), '→', identified
+    console.log ''
 
 
 module.exports = new HookCollection [], EVENTS
