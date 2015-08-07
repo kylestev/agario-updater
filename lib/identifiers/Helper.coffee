@@ -164,4 +164,12 @@ class Helper
       _.each callback.body.reverse(), (node) ->
         func.body.body.unshift node
 
+  injectTailCallback: (ast, callbackPath, params) ->
+    @callbacks.push () =>
+      callback = esprima.parse(callbackPath + '(' + params.join(', ') + ')')
+      name = callbackPath.substring(callbackPath.indexOf('.') + 1)
+      @injectCommentIdentifier callback.body[0], {}, { type: 'Callback', name: name }
+      _.each callback.body.reverse(), (node) ->
+        ast.splice ast.length - 1, 0, node
+
 module.exports = new Helper
