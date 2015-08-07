@@ -10,5 +10,6 @@ The purpose of this package is to aid in reverse engineering and modding of the 
 2. `cd` into the cloned repo's directory
 3. `$ npm install`
 4. `$ npm install -g coffee-script`
-5. `$ coffee updater.coffee`
+5. `$ cp config-sample.json config.json`
+6. `$ coffee updater.coffee`
 

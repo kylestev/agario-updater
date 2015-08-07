@@ -3,6 +3,7 @@ _ = require('lodash')
 esprima = require('esprima')
 escodegen = require('escodegen')
 Helper = require('./lib/identifiers/Helper')
+config = require('./config.json')
 
 analyze = (root, identifiers, tree) ->
   _.each identifiers, (identifier) ->
@@ -42,7 +43,7 @@ analyzeRevision = (revision, filename) ->
 
     console.log 'Analyzed Revision', revision, 'in', elapsed.toFixed(3) + 's'
     _.first(_.values identifiers).hooks.modScript()
-    Helper.injectDefered()
+    Helper.injectDefered(config)
 
     # generate the code
     codegenElapsed = Helper.stopWatch () ->
