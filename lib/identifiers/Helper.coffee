@@ -124,11 +124,9 @@ class Helper
   parameterize: (obj) ->
     (_.map(obj, (value, key) -> (key + '="' + value + '"'))).join(', ')
 
-  injectComments: () ->
-    _.each @comments, (cb) -> cb()
-
-  injectCallbacks: () ->
+  injectDefered: () ->
     _.each @callbacks, (cb) -> cb()
+    _.each @comments, (cb) -> cb()
 
   injectCommentBlock: (node, comment) ->
     @comments.push () ->
