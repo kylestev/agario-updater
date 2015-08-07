@@ -12,8 +12,18 @@ class PacketHandlerIdentifier extends Identifier
     @emitter.on 'hook.added', (hook) =>
       if (_.matches { type: 'ClassHook', name: 'Init' })(hook)
         that = @
+        func = null
         estraverse.traverse @tree, {
           enter: (node, parent) ->
+            if node.type == 'FunctionDeclaration'
+              func = node
+
+            if node.type == 'ExpressionStatement' and node.expression.type == 'CallExpression' and node.expression.callee.type == 'MemberExpression'
+              expr = node.expression
+              if expr.callee.object.name == 'console' and expr.arguments.length == 1 and expr.arguments[0].value == 'socket close'
+                hook = that.identifyFunction 'WebSocketCloseHandler', func
+                Helper.injectFunctionHookComment func, hook
+
             if node.type == 'NewExpression' and node.callee.name == 'DataView' and node.arguments[0].type == 'MemberExpression'
               hook = that.identifyFunction 'PacketHandler', { id: name: parent.callee.name }, { buffer: 'a' }
               func = Helper.findFunction(that.root, parent.callee.name)
