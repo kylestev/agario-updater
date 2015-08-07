@@ -1,6 +1,7 @@
 _ = require('lodash')
 Identifier = require('./Identifier')
 Helper = require('./Helper')
+estraverse = require('estraverse')
 
 class CanvasIdentifier extends Identifier
   constructor: () ->
@@ -13,21 +14,27 @@ class CanvasIdentifier extends Identifier
         @identifyCanvasMembers hook
 
   visit: (@root, @tree) ->
+    cachedCanvasName = null
+    estraverse.traverse @tree, {
+      enter: (node, parent) ->
+        if (_.matches { type: 'NewExpression', arguments: [{ value: '#FFFFFF' }, { value: '#000000' }] })(node)
+          cachedCanvasName = node.callee.name
+          this.break()
+    }
+    cachedCanvas = _.find _.filter(@root, (node) -> Helper.matchType 'FunctionDeclaration'), { id: name: cachedCanvasName }
+    @identifyCachedCanvas cachedCanvas
 
   identifyCanvasMembers: (cls) ->
     initFunc = _.find @root, {
       type: 'FunctionDeclaration'
       id: { name: cls['class'] } }
     try
-      @identifyCachedCanvas _.filter @root, (node) -> Helper.matchType 'FunctionDeclaration'
       @identifyCanvas initFunc
       @identifyCanvasContext initFunc
     catch error
       throw error
 
-  identifyCachedCanvas: (funcs) ->
-    clazz = _.find funcs, (func) -> Helper.matchFunctionParameterCount func, 4
-
+  identifyCachedCanvas: (clazz) ->
     if clazz
       canvasHook = @identifyClass 'CachedCanvas', clazz.id.name
       fieldMembers = ['size', 'color', 'stroke', 'strokeColor']
