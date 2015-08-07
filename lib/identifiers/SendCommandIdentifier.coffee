@@ -266,12 +266,14 @@ class SendCommandIdentifier extends Identifier
         return
 
       [func, interval] = params
-      if Helper.matchType(func, 'Identifier') and _.matches interval, { type: 'Literal', value: 180000 }
+      if Helper.matchType(func, 'Identifier') and (_.matches { type: 'Literal', value: 180000 })(interval)
         realFunc = Helper.findFunction tree, func.name
         hook = @identifyFunction 'PlayerStatistics', realFunc
         Helper.injectFunctionHookComment node, hook
       else
-        @identifyFunction 'PlayerStatistics', 'BROKEN'
+        console.log @hooks.hooks
+        if _.size(_.filter(@hooks.hooks, { name: 'PlayerStatistics' })) != 1
+          @identifyFunction 'PlayerStatistics', null
 
   identifySendCommand: (tree) ->
     isConnected = _.find @hooks.hooks, { name: 'IsConnected' }
