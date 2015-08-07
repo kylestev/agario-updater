@@ -15,11 +15,11 @@ class CanvasEventIdentifier extends Identifier
   boot: () ->
     @emitter.on 'field.added', (cls, hook) =>
       if hook.name == 'gameCanvas'
-        console.log 'gameCanvas found'
         @identifyCanvasEvents cls, hook
 
-    @emitter.on 'gameCanvas.event', (eventName, ast) ->
-      console.log 'located gameCanvas event:', eventName
+    @emitter.on 'gameCanvas.event', (eventName, ast) =>
+      if eventName == 'onmousewheel'
+        @identifyWheelHandler ast
 
   identifyCanvasEvents: (cls, canvasHook) ->
     estraverse.traverse @tree, {
@@ -40,7 +40,21 @@ class CanvasEventIdentifier extends Identifier
           @emitter.emit 'gameCanvas.event', node.left.property.name, node.right
     }
 
+  identifyWheelHandler: (ast) ->
+    func = Helper.findFunction @root, ast.name
+    if func
+      hook = @identifyFunction 'WheelHandler', func, { event: func.params[0].name }
+      _.find @root, (node) =>
+        if not Helper.matchType(node, 'FunctionDeclaration') or node.id.name != func.id.name or node.params.length != func.params.length
+          return
+
+        Helper.injectFunctionHookComment node, hook
+        return true
+    else
+      @identifyFunction 'WheelHandler', null
+
   visit: (root, tree) ->
+    @root = root
     @tree = tree
 
 
