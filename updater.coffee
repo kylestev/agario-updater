@@ -42,6 +42,7 @@ analyzeRevision = (revision, filename) ->
 
     console.log 'Analyzed Revision', revision, 'in', elapsed.toFixed(3) + 's'
     _.first(_.values identifiers).hooks.modScript()
+    Helper.injectComments()
 
     # generate the code
     codegenElapsed = Helper.stopWatch () ->

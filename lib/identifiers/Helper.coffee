@@ -2,37 +2,38 @@ _ = require('lodash')
 esprima = require('esprima')
 
 class Helper
-  constructor: ()->
+  constructor: () ->
+    @comments = []
   
-  @matchFunctionParameterCount: (node, count) ->
+  matchFunctionParameterCount: (node, count) ->
     node.type == 'FunctionDeclaration' and node.params.length == count
   
-  @matchFunctionParameterCountBetween: (node, lower, upper) ->
+  matchFunctionParameterCountBetween: (node, lower, upper) ->
     node.type == 'FunctionDeclaration' and node.params.length >= lower and node.params.length <= upper
 
-  @matchType: (node, type) ->
+  matchType: (node, type) ->
     node.type == type
 
-  @matchExpressionType: (node, type) ->
+  matchExpressionType: (node, type) ->
     @matchType(node, 'ExpressionStatement') and @matchType(node.expression, type)
 
-  @matchAssignmentExpression: (node, side, type) ->
+  matchAssignmentExpression: (node, side, type) ->
     if not @matchExpressionType node, 'AssignmentExpression'
       return false
     @matchType node.expression[side], type
 
-  @matchCaller: (node, caller) ->
+  matchCaller: (node, caller) ->
     if not @matchExpressionType node, 'CallExpression'
       return false
     node.expression.callee.name == caller
 
-  @extractAssignmentMember: (node, side) ->
+  extractAssignmentMember: (node, side) ->
     node.expression[side]
 
-  @extractCallArguments: (node) ->
+  extractCallArguments: (node) ->
     node.arguments
 
-  @extractConstructorParameters: (node, paramNames, cb) ->
+  extractConstructorParameters: (node, paramNames, cb) ->
     count = 0
     for idx, expr of node.body.body
       if count >= paramNames.length
@@ -105,7 +106,7 @@ class Helper
 
       count += 1
 
-  @findFunction: (tree, name) ->
+  findFunction: (tree, name) ->
     _.find tree, (node) =>
       if not @matchType node, 'FunctionDeclaration'
         return false
@@ -113,42 +114,45 @@ class Helper
       if node.id and node.id.name == name
         return node
 
-  @stopWatch: (func) ->
+  stopWatch: (func) ->
     start_time = _.now()
     func()
     end_time = _.now()
     (end_time - start_time) / 1000.0
 
-  @parameterize: (obj) ->
+  parameterize: (obj) ->
     (_.map(obj, (value, key) -> (key + '="' + value + '"'))).join(', ')
 
-  @injectCommentBlock: (node, comment) ->
-    if not node.leadingComments
-      node.leadingComments = []
+  injectComments: () ->
+    _.each @comments, (cb) -> cb()
 
-    node.leadingComments.push({ type: 'Block', value: comment })
+  injectCommentBlock: (node, comment) ->
+    @comments.push () ->
+      if not node.leadingComments
+        node.leadingComments = []
+      node.leadingComments.push({ type: 'Block', value: comment })
 
-  @injectCommentIdentifier: (node, info, hook) ->
+  injectCommentIdentifier: (node, info, hook) ->
     info = _.merge { name: hook.name }, info
 
     @injectCommentBlock node, '* @' + hook.type + '(' + @parameterize(info) + ') '
 
-  @injectFieldHookComment: (node, hook) ->
+  injectFieldHookComment: (node, hook) ->
     @injectCommentIdentifier node, { field: hook.field.name }, hook
 
-  @injectFunctionHookComment: (node, hook) ->
+  injectFunctionHookComment: (node, hook) ->
     info = { func: hook.func.id.name }
     if _.size(hook.params) > 0
       info.params = _.keys hook.params
 
     @injectCommentIdentifier node, info, hook
 
-  @injectClassHookComment: (node, hook) ->
+  injectClassHookComment: (node, hook) ->
     info = { 'class': hook['class'] }
     info.params = _.map hook.fields, (field) -> field.name
     @injectCommentIdentifier node, info, hook
 
-  @injectCallback: (func, callbackPath) ->
+  injectCallback: (func, callbackPath) ->
     params = _.pluck func.params, 'name'
     
     callback = esprima.parse(callbackPath + '(' + params.join(', ') + ')')
@@ -157,4 +161,4 @@ class Helper
     _.each callback.body.reverse(), (node) ->
       func.body.body.unshift node
 
-module.exports = Helper
+module.exports = new Helper
