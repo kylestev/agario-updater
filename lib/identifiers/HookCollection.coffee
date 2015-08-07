@@ -64,9 +64,8 @@ class HookCollection
     }
 
   modScript: () ->
-    classes = _.filter @hooks, { type: 'ClassHook' }
+    classes = _.sortBy _.filter(@hooks, { type: 'ClassHook' }), 'name'
 
-    clazz = _.first classes
     _.each classes, (clazz) ->
       identified = if clazz['class'] == null then 'BROKEN' else clazz['class']
       console.log '∫', clazz.name, '→', identified
