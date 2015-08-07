@@ -20,6 +20,9 @@ class HookCollection
     match = _.find @hooks, { type: 'ClassHook', name: clazz }
     if not match
       throw 'class not found: ' + clazz
+    fld = _.find match.fields, { name: field.name }
+    if fld
+      return fld
     match.fields.push field
     @emitter.emit 'field.added', match, field
     return field
