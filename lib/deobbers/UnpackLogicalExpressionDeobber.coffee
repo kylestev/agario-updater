@@ -1,4 +1,12 @@
+_ = require('lodash')
+esprima = require('esprima')
 Deobber = require('./Deobber')
+
+FALSE_LITERAL = esprima.parse('false').body[0].expression;
+TRUE_LITERAL = esprima.parse('true').body[0].expression;
+
+NOT_ZERO = esprima.parse('!0').body[0].expression;
+NOT_ONE = esprima.parse('!1').body[0].expression;
 
 class UnpackLogicalExpressionDeobber extends Deobber
 
@@ -20,6 +28,12 @@ class UnpackLogicalExpressionDeobber extends Deobber
     expr
 
   enter: (node, parent) =>
+    if _.eq NOT_ZERO, node
+      return TRUE_LITERAL
+
+    if _.eq NOT_ONE, node
+      return FALSE_LITERAL
+
     if node.type == 'ExpressionStatement'
       expr = node.expression
       if expr.type == 'LogicalExpression'
