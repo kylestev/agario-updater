@@ -4,6 +4,7 @@ esprima = require('esprima')
 class Helper
   constructor: () ->
     @comments = []
+    @callbacks = []
   
   matchFunctionParameterCount: (node, count) ->
     node.type == 'FunctionDeclaration' and node.params.length == count
@@ -126,6 +127,9 @@ class Helper
   injectComments: () ->
     _.each @comments, (cb) -> cb()
 
+  injectCallbacks: () ->
+    _.each @callbacks, (cb) -> cb()
+
   injectCommentBlock: (node, comment) ->
     @comments.push () ->
       if not node.leadingComments
@@ -153,12 +157,13 @@ class Helper
     @injectCommentIdentifier node, info, hook
 
   injectCallback: (func, callbackPath) ->
-    params = _.pluck func.params, 'name'
-    
-    callback = esprima.parse(callbackPath + '(' + params.join(', ') + ')')
-    @injectCommentIdentifier callback.body[0], {}, { type: 'Callback', name: callbackPath.split('.')[1] }
-    # reverse the order of the 
-    _.each callback.body.reverse(), (node) ->
-      func.body.body.unshift node
+    @callbacks.push () =>
+      params = _.pluck func.params, 'name'
+
+      callback = esprima.parse(callbackPath + '(' + params.join(', ') + ')')
+      @injectCommentIdentifier callback.body[0], {}, { type: 'Callback', name: callbackPath.split('.')[1] }
+      # reverse the order of the 
+      _.each callback.body.reverse(), (node) ->
+        func.body.body.unshift node
 
 module.exports = new Helper
