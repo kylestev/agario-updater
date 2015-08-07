@@ -1,0 +1,17 @@
+{
+  "name": "agario-updater",
+  "version": "0.1.0",
+  "description": "static analysis package for analyzing the game code of the very popular MMO agar.io",
+  "main": "updater.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kyle Stevenson",
+  "license": "MIT",
+  "dependencies": {
+    "escodegen": "^1.6.1",
+    "esprima": "^2.5.0",
+    "estraverse": "^4.1.0",
+    "lodash": "^3.10.1"
+  }
+}
