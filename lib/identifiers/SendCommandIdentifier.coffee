@@ -39,58 +39,6 @@ class SendCommandIdentifier extends Identifier
       console.error error.message
       throw error
 
-  identifyCachedCanvas: (funcs) ->
-    clazz = _.find funcs, (func) -> Helper.matchFunctionParameterCount func, 4
-
-    if clazz
-      canvasHook = @identifyClass 'CachedCanvas', clazz.id.name
-      fieldMembers = ['size', 'color', 'stroke', 'strokeColor']
-      Helper.extractConstructorParameters clazz, fieldMembers, (name, field, node) =>
-        hook = @identifyField 'CachedCanvas', name, field
-        Helper.injectFieldHookComment node, hook
-      Helper.injectClassHookComment clazz, canvasHook
-    else
-      @identifyClass 'CachedCanvas', null
-
-  identifyCanvasContext: (tree, initFunc) ->
-    canvasField = @getField 'Init', 'canvas'
-    _.find initFunc.body.body, (node) =>
-      if not _.matches({
-          type: 'ExpressionStatement', expression: {
-            type: 'AssignmentExpression'
-            right: { type: 'CallExpression', callee: { object: canvasField.field } } }
-        })(node)
-        return false
-
-      params = Helper.extractCallArguments node.expression.right
-      if params.length != 1
-        return false
-
-      [canvas] = params
-      if _.matches({ type: 'Literal', value: '2d' })(canvas)
-        hook = @identifyField 'Init', 'canvasContext', node.expression.left
-        Helper.injectFieldHookComment node, hook
-        return true
-
-  identifyCanvas: (tree, initFunc) ->
-    _.find initFunc.body.body, (node) =>
-      if not _.matches({
-          type: 'ExpressionStatement', expression: {
-            type: 'AssignmentExpression', right: {
-              type: 'AssignmentExpression', right: { type: 'CallExpression' } } }
-        })(node)
-        return false
-
-      params = Helper.extractCallArguments node.expression.right.right
-      if params.length != 1
-        return false
-
-      [canvas] = params
-      if _.matches({ type: 'Literal', value: 'canvas' })(canvas)
-        hook = @identifyField 'Init', 'canvas', node.expression.left
-        Helper.injectFieldHookComment node, hook
-        return true
-
   identifyRenderInternational: (funcs) ->
     match = _.find funcs, (func) ->
       if not Helper.matchFunctionParameterCount(func, 1) 
