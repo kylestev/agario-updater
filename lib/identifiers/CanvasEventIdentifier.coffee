@@ -29,15 +29,16 @@ class CanvasEventIdentifier extends Identifier
             return undefined
           func = _.clone node.right
           func.id = { name: node.left.object.name + '.' + node.left.property.name }
+          boundTo = if canvasHook.field.name == node.left.object.name then canvasHook.name else 'window'
           Helper.injectFunctionHookComment node, {
-            name: 'gameCanvas.' + node.left.property.name
+            name: boundTo + '.' + node.left.property.name
             type: 'EventHook'
             func: func
             params: { event: 'a' }
           }
           if node.right.body isnt undefined
             Helper.injectCallback node.right, 'Callbacks.' + @inputEvents[node.left.property.name]
-          @emitter.emit 'gameCanvas.event', node.left.property.name, node.right
+          @emitter.emit boundTo + '.event', node.left.property.name, node.right
     }
 
   identifyWheelHandler: (ast) ->
